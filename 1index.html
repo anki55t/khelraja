@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="hi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Dragon vs Tiger — Simple Game</title>
+  <style>
+    :root{
+      --bg:#071022; --card:#0b1220; --accent:#f59e0b; --muted:#94a3b8; 
+    }
+    *{box-sizing:border-box;font-family:Inter,system-ui,Segoe UI,Roboto,'Helvetica Neue',Arial}
+    body{margin:0;min-height:100vh;background:linear-gradient(180deg,#071022,#081730);color:#eef2ff;display:flex;align-items:center;justify-content:center;padding:20px}
+    .wrap{max-width:900px;width:100%}
+    h1{text-align:center;margin:6px 0 18px;color:var(--accent)}
+    .arena{display:grid;grid-template-columns:1fr 300px;gap:18px;align-items:start}
+    .card{background:rgba(255,255,255,0.04);border-radius:12px;padding:16px;box-shadow:0 8px 30px rgba(2,6,23,0.7)}
+    .fighters{display:flex;gap:12px;justify-content:space-between;align-items:center}
+    .fighter{flex:1;padding:12px;border-radius:10px;background:linear-gradient(180deg, rgba(255,255,255,0.02), transparent);text-align:center;position:relative}
+    .emoji{font-size:72px;display:block}
+    .name{font-weight:700;margin-top:8px}
+    .hpbar{height:12px;background:rgba(255,255,255,0.06);border-radius:999px;margin-top:10px;overflow:hidden}
+    .hp{height:100%;background:linear-gradient(90deg,#10b981,#84cc16);width:100%}
+    .controls{display:flex;flex-direction:column;gap:8px}
+    button{padding:10px;border-radius:8px;border:0;background:var(--accent);color:#041223;font-weight:700;cursor:pointer}
+    button:disabled{opacity:0.5;cursor:not-allowed}
+    .log{height:220px;overflow:auto;padding:10px;background:rgba(0,0,0,0.2);border-radius:8px;font-size:14px;color:var(--muted)}
+    .stats{display:flex;gap:8px;flex-wrap:wrap}
+    .stat{background:rgba(255,255,255,0.03);padding:8px;border-radius:8px}
+    .center{display:flex;align-items:center;justify-content:center}
+    .small{font-size:13px;color:var(--muted)}
+    .flash{animation:flash 160ms linear}
+    @keyframes flash{from{transform:scale(1)}50%{transform:scale(0.95)}to{transform:scale(1)}}
+    .cooldown{opacity:0.7;font-size:13px}
+    .win{color:#84cc16;font-weight:800}
+    .lose{color:#fb7185;font-weight:800}
+    footer{margin-top:12px;text-align:center;color:var(--muted);font-size:13px}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Dragon 🐉 vs Tiger 🐯</h1>
+    <div class="arena">
+      <div class="card">
+        <div class="fighters">
+          <div class="fighter" id="playerCard">
+            <span class="emoji" id="playerEmoji">🐉</span>
+            <div class="name" id="playerName">Dragon (You)</div>
+            <div class="hpbar"><div class="hp" id="playerHp" style="width:100%"></div></div>
+            <div class="small">HP: <span id="playerHpText">100</span>/100</div>
+          </div>
+
+          <div class="fighter" id="enemyCard">
+            <span class="emoji" id="enemyEmoji">🐯</span>
+            <div class="name" id="enemyName">Tiger (Enemy)</div>
+            <div class="hpbar"><div class="hp" id="enemyHp" style="width:100%"></div></div>
+            <div class="small">HP: <span id="enemyHpText">100</span>/100</div>
+          </div>
+        </div>
+
+        <hr style="margin:12px 0;border:none;border-top:1px solid rgba(255,255,255,0.04)">
+
+        <div class="controls">
+          <div style="display:flex;gap:8px;">
+            <button id="attackBtn">Attack</button>
+            <button id="specialBtn">Special (Cool 3)</button>
+            <button id="healBtn">Heal</button>
+            <button id="resetBtn" style="background:#94a3b8;color:#071022">Reset</button>
+          </div>
+          <div class="stats" style="margin-top:8px;">
+            <div class="stat">Round: <span id="round">0</span></div>
+            <div class="stat">Your Wins: <span id="wins">0</span></div>
+            <div class="stat">Enemy Wins: <span id="losses">0</span></div>
+            <div class="stat small">Highscore (Your fastest win in rounds): <span id="highscore">—</span></div>
+          </div>
+        </div>
+
+        <hr style="margin:12px 0;border:none;border-top:1px solid rgba(255,255,255,0.04)">
+
+        <div class="log" id="log">Game ready. Click <strong>Attack</strong> to start!</div>
+      </div>
+
+      <div class="card">
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <div>
+            <label class="small">Choose your fighter:</label>
+            <div style="display:flex;gap:8px;margin-top:8px">
+              <button id="chooseDragon">Dragon 🐉</button>
+              <button id="chooseTiger">Tiger 🐯</button>
+            </div>
+          </div>
+
+          <div>
+            <label class="small">Difficulty:</label>
+            <div style="display:flex;gap:8px;margin-top:8px">
+              <button id="easy">Easy</button>
+              <button id="normal">Normal</button>
+              <button id="hard">Hard</button>
+            </div>
+          </div>
+
+          <div>
+            <label class="small">Info:</label>
+            <div class="small" style="margin-top:6px">
+              Attack = normal hit. Special = big hit (3-round cooldown). Heal = recover small HP.
+              Enemy auto-attacks after your turn.
+            </div>
+          </div>
+
+          <div style="margin-top:8px">
+            <label class="small">Controls:</label>
+            <div class="small" style="margin-top:6px">
+              - Click buttons. <br>- Keyboard: A = Attack, S = Special, H = Heal, R = Reset.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <footer>Made simple — Drag/Tiger game. Your files, your control.</footer>
+  </div>
+
+  <script>
+    // Game state
+    let player = {name:'Dragon', emoji:'🐉', hp:100};
+    let enemy  = {name:'Tiger', emoji:'🐯', hp:100};
+    let round = 0, wins=0, losses=0, highscore = null;
+    let specialCooldown = 0;
+    let difficulty = 'normal'; // easy, normal, hard
+
+    // Elements
+    const el = id => document.getElementById(id);
+    const log = el('log');
+    const attackBtn = el('attackBtn'), specialBtn = el('specialBtn'), healBtn = el('healBtn'), resetBtn = el('resetBtn');
+    const playerHp = el('playerHp'), enemyHp = el('enemyHp');
+    const playerHpText = el('playerHpText'), enemyHpText = el('enemyHpText');
+    const roundEl = el('round'), winsEl = el('wins'), lossesEl = el('losses'), highEl = el('highscore');
+
+    // Utils
+    function rand(min,max){ return Math.floor(Math.random()*(max-min+1))+min; }
+    function clamp(v,min,max){ return Math.max(min,Math.min(max,v)); }
+    function updateUI(){
+      playerHp.style.width = player.hp + '%';
+      enemyHp.style.width  = enemy.hp + '%';
+      playerHpText.innerText = clamp(player.hp,0,100);
+      enemyHpText.innerText = clamp(enemy.hp,0,100);
+      roundEl.innerText = round;
+      winsEl.innerText = wins;
+      lossesEl.innerText = losses;
+      highEl.innerText = highscore === null ? '—' : highscore;
+      specialBtn.innerText = specialCooldown>0 ? `Special (${specialCooldown})` : 'Special';
+      specialBtn.disabled = specialCooldown>0;
+    }
+    function pushLog(txt, cls=''){ 
+      const p = document.createElement('div'); p.innerHTML = txt; if(cls) p.className=cls;
+      log.prepend(p);
+    }
+
+    // Difficulty modifier
+    function enemyDamageRange(){
+      if(difficulty==='easy') return [6,12];
+      if(difficulty==='hard') return [14,22];
+      return [10,16];
+    }
+    function playerDamageRange(){
+      if(difficulty==='easy') return [12,20];
+      if(difficulty==='hard') return [6,12];
+      return [9,16];
+    }
+
+    // Actions
+    function playerAttack(){
+      if(isGameOver()) return;
+      round++;
+      const [min,max] = playerDamageRange();
+      const dmg = rand(min,max);
+      enemy.hp = clamp(enemy.hp - dmg, 0, 100);
+      pushLog(`<strong>You</strong> attacked ➜ ${dmg} dmg`);
+      animateHit('enemyCard');
+      afterPlayerTurn();
+    }
+
+    function playerSpecial(){
+      if(isGameOver() || specialCooldown>0
