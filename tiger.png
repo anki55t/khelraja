@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Drag the Tiger</title>
+  <style>
+    body {
+      margin: 0;
+      height: 100vh;
+      background-color: #cfe8fc;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+      user-select: none;
+    }
+    #tiger {
+      width: 150px;
+      height: 150px;
+      background-image: url('tiger.png'); /* अब आपकी repo की इमेज */
+      background-size: cover;
+      position: absolute;
+      left: calc(50% - 75px);
+      top: calc(50% - 75px);
+      cursor: grab;
+    }
+  </style>
+</head>
+<body>
+  <div id="tiger"></div>
+
+  <script>
+    const tiger = document.getElementById('tiger');
+    let offsetX, offsetY, isDragging = false;
+
+    // Mouse drag
+    tiger.addEventListener('mousedown', (e) => {
+      isDragging = true;
+      offsetX = e.clientX - tiger.offsetLeft;
+      offsetY = e.clientY - tiger.offsetTop;
+      tiger.style.cursor = 'grabbing';
+    });
+
+    document.addEventListener('mousemove', (e) => {
+      if (isDragging) {
+        tiger.style.left = (e.clientX - offsetX) + 'px';
+        tiger.style.top = (e.clientY - offsetY) + 'px';
+      }
+    });
+
+    document.addEventListener('mouseup', () => {
+      isDragging = false;
+      tiger.style.cursor = 'grab';
+    });
+
+    // Touch drag (mobile)
+    tiger.addEventListener('touchstart', (e) => {
+      isDragging = true;
+      const touch = e.touches[0];
+      offsetX = touch.clientX - tiger.offsetLeft;
+      offsetY = touch.clientY - tiger.offsetTop;
+    });
+
+    document.addEventListener('touchmove', (e) => {
+      if (isDragging) {
+        const touch = e.touches[0];
+        tiger.style.left = (touch.clientX - offsetX) + 'px';
+        tiger.style.top = (touch.clientY - offsetY) + 'px';
+      }
+    });
+
+    document.addEventListener('touchend', () => {
+      isDragging = false;
+    });
+  </script>
+</body>
+</html>
